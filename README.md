@@ -4,7 +4,7 @@
 
 # $\texttt{BirdSet}$ - A Large-Scale Dataset for Audio Classification in Avian Bioacoustics 🤗
 [![python](https://img.shields.io/badge/-Python_3.10-blue?logo=python&logoColor=white)](https://github.com/pre-commit/pre-commit)
-<a href="https://huggingface.co/"><img alt="Hugging Face" src="https://img.shields.io/badge/HuggingFace-ffcc00?logo=huggingface&logoColor=white"></a>
+<a href="https://huggingface.co/datasets/DBD-research-group/BirdSet"><img alt="Hugging Face" src="https://img.shields.io/badge/HuggingFace-ffcc00?logo=huggingface&logoColor=white"></a>
 <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 <a href="https://www.pytorchlightning.ai/"><img alt="PyTorch Lightning" src="https://img.shields.io/badge/PyTorch_Lightning-792ee5?logo=pytorch-lightning&logoColor=white"></a>
 <a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
@@ -22,10 +22,11 @@ Deep learning (DL) has greatly advanced audio classification, yet the field is l
 
 **TL;DR**
 > - Explore our **datasets** shared on Hugging Face 🤗 in the [BirdSet repository](https://huggingface.co/datasets/DBD-research-group/BirdSet).
+> - Birdset works up until datasets<=3.6.0, we are looking into updates to support the newest version.
 > - This accompanying **code** provides comprehensive support tool for data preparation, model training, and evaluation. 
 > - Participate in our Hugging Face [leaderboard](https://huggingface.co/spaces/DBD-research-group/BirdSet-Leaderboard) by submitting new results and comparing performance across models.
 > - Access our pre-trained [model checkpoints](https://huggingface.co/collections/DBD-research-group/birdset-dataset-and-models-665ef710a28cbe70dfaa028a) on Hugging Face, ready to fine-tune or evaluate for various tasks.
-> - A Q&A section is included at the end of this README. If you have further questions or encounter any issues, please raise an issue. 
+> - A Q&A section is included at the end of this README. If you have further questions or encounter any issues, please raise an issue.
 <br>
 
 <div align="center">
@@ -393,10 +394,8 @@ from datasets import load_dataset
 dataset = load_dataset(
     "DBD-research-group/BirdSet", 
     "HSN", 
-    cache_dir="the directory you used", 
+    cache_dir="/path/to/custom/cache/dir", 
     num_proc=1, 
-    #revision="629b54c06874b6d2fa886e1c0d73146c975612d0" <-- if your cache directory is correct and a new download is starting,
-    #you can use this revision (we added some metadata ~2 days ago which forces a redownload). if not, ignore this
 )
 
 dataset["train"].features["ebird_code"]
@@ -450,44 +449,12 @@ In the case of XCL this should output `ostric2`.
 
 **Please note:** Changing the last layer in any way (e.g. changing the output layer to 21 classes to fine-tune on HSN) will remove or invalidate that label information from the configs. In that case you will need to get that information differently. In case of BirdSet datasets you can look under [resources/ebird_codes](https://github.com/DBD-research-group/BirdSet/tree/main/resources/ebird_codes). The json files in that directory contain `label2id` and `id2label` dicts for every dataset.
 
--------
-#### **Why are the datasets larger than expected? (should only apply to downloads before 05-12-2024! fixed)**
+------
+## Dataset Changelog
+For dataset updates please see the [Dataset Card](https://huggingface.co/datasets/DBD-research-group/BirdSet#changelog)
 
-Currently, our HF builder script extracts all zipped files to ensure clear file paths while retaining the original zipped files. This results in increased storage requirements.
-
-_Example_:  
-For the largest dataset, `XCL`, the zipped files are approximately 480GB. However, due to the extraction process, you’ll need around 990GB of available disk space. After the extraction, the zipped files will account for roughly 510GB.  
-
-*Quick Workaround*:  
-After extraction, you can delete unnecessary files by running in `XCL/downloads/`
-```bash
-find . -mindepth 1 -maxdepth 1 ! -name 'extracted' -exec rm -rfv {} +
-```
-**This issue is fixed, more information: see Q below.**
 
 ------
-#### **Hugging Face downloads the dataset again even though I already downloaded it**
-We made a samll update fixing [Issue 267: Data download size descrepancy](https://github.com/DBD-research-group/BirdSet/issues/267) on **05-12-2024**:
-- **This only works for datasets<3.0.0!**
-- TL;DR: During the extraction process, unnecessary archives are now removed immediately. This reduces the required disk space by *half*, now aligning it with the table below.
-- If you downloaded the data between this and last update and don't want to redownload yet, you can use the following `revision=b0c14a03571a7d73d56b12c4b1db81952c4f7e64`:
-```python
-from datasets import load_dataset
-ds = load_dataset("DBD-research-group/BirdSet", "HSN", trust_remote_code=True, revision="b0c14a03571a7d73d56b12c4b1db81952c4f7e64")
-```
-
-We made a small update to the metadata on **27-11-2024**: 
-
-- Additional bird taxonomy metadata, including "Genus," "Species Group," and "Order," is provided using the 2021 eBird taxonomy, consistent with the taxonomy used for the 'ebird_code' data. These metadata fields follow the same format and encoding as 'ebird_code' and 'ebird_code_multilabel'. Further explanation can be found on our Hugging Face [BirdSet repository](https://huggingface.co/datasets/DBD-research-group/BirdSet).
-
-- If you don't require the additional taxonomy and prefer to **avoid re-downloading all files**, you can specify the previous revision directly in load_dataset as follows:
-
-```python
-from datasets import load_dataset
-ds = load_dataset("DBD-research-group/BirdSet", "HSN", trust_remote_code=True, revision="629b54c06874b6d2fa886e1c0d73146c975612d0")
-```
-
-
 ## Citation
 
 ```
