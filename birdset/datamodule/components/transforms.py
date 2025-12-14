@@ -124,11 +124,11 @@ class BaseTransforms:
         """
         batch = self.decode_batch(batch)
 
-        input_values, labels = self.transform_values(batch)
+        input_values, labels, paths = self.transform_values(batch)
 
         labels = self.transform_labels(labels)
 
-        return {"input_values": input_values, "labels": labels}
+        return {"input_values": input_values, "labels": labels, "paths": paths}
 
     def decode_batch(self, batch):
         # we overwrite the feature extractor with None because we can do this here manually
@@ -165,7 +165,7 @@ class BaseTransforms:
         # waveform_batch = waveform_batch["input_values"].unsqueeze(1)
         waveform_batch = waveform_batch["input_values"]
 
-        return waveform_batch, batch["labels"]
+        return waveform_batch, batch["labels"], batch["audio"]["paths"]
 
     def transform_labels(self, labels):
         if self.task == "multilabel":  # for bcelosswithlogits
@@ -286,7 +286,7 @@ class BirdSetTransformsWrapper(BaseTransforms):
         if self.preprocessing is not None:
             input_values = self._preprocess(input_values, attention_mask)
 
-        return input_values, labels
+        return input_values, labels, batch["filepath"]
 
     def _preprocess(
         self, input_values: torch.Tensor, attention_mask: torch.Tensor
