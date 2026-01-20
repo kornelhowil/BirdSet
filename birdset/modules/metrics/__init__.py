@@ -6,3 +6,4 @@ from birdset.modules.metrics.multilabel import TopKAccuracy
 from birdset.modules.metrics.multiclass import BalancedAccuracy
 from birdset.modules.metrics.multiclass import BalancedAccuracyTop5
 from birdset.modules.metrics.multilabel import cmAP5
+from birdset.modules.metrics.multilabel import EqualErrorRate
