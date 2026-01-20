@@ -5,7 +5,7 @@ from transformers import get_scheduler
 from functools import partial
 from torchmetrics import AUROC, Metric, MaxMetric, MetricCollection
 
-from birdset.modules.metrics.multilabel import TopKAccuracy, cmAP, cmAP5, mAP, pcmAP
+from birdset.modules.metrics.multilabel import TopKAccuracy, cmAP, cmAP5, mAP, pcmAP, EqualErrorRate
 from birdset.modules.models.efficientnet import EfficientNetClassifier
 
 
@@ -110,11 +110,12 @@ class MetricsConfig:
                 thresholds=None
             ),
             'T1Accuracy': TopKAccuracy(topk=1),
-            'T3Accuracy': TopKAccuracy(topk=3),
+            #'T3Accuracy': TopKAccuracy(topk=3),
             'mAP': mAP(
                 num_labels=num_labels,
                 thresholds=None
-            )
+            ),
+            'EER':EqualErrorRate()
         })
         self.eval_complete: MetricCollection = MetricCollection({
             'cmAP5': cmAP5(

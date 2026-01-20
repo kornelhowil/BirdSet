@@ -3,6 +3,11 @@ import torchmetrics
 from torchmetrics.classification.average_precision import MultilabelAveragePrecision
 from torchmetrics import Metric
 from torchmetrics.utilities.data import dim_zero_cat
+import numpy as np
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
+from sklearn.metrics import roc_curve
+from typing import Tuple
 
 class cmAP5(Metric):
     def __init__(
@@ -210,3 +215,23 @@ class TopKAccuracy(torchmetrics.Metric):
 
     def compute(self):
         return self.correct.float() / self.total
+    
+    
+class EqualErrorRate(torchmetrics.Metric):
+    def __init__(
+            self,
+        ):
+        super().__init__()
+        self.add_state("accumulated_predictions", default=[], dist_reduce_fx="cat")
+        self.add_state("accumulated_labels", default=[], dist_reduce_fx="cat")
+
+    def update(self, logits: torch.Tensor, labels: torch.Tensor):
+        self.accumulated_predictions.extend(torch.nn.functional.softmax(logits, dim=1)[:,0].tolist())
+        self.accumulated_labels.extend(labels[:,1].tolist())
+
+    def compute(self) -> torch.Tensor:
+        fpr, tpr, thresholds = roc_curve(np.array(self.accumulated_labels), -np.array(self.accumulated_predictions))
+        eer = brentq(lambda x: 1.0 - x - interp1d(fpr, tpr)(x), 0.0, 1.0)
+        return torch.tensor(eer)
+    
+    
